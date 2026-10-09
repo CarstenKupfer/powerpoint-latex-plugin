@@ -1,0 +1,1 @@
+# powerpoint-latex-plugin
