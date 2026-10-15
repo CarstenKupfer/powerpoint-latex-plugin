@@ -61,6 +61,7 @@
             this.btnInsertMath.Name = "btnInsertMath";
             this.btnInsertMath.ScreenTip = "Insert Math Field";
             this.btnInsertMath.SuperTip = "Insert a new editable LaTeX math field.";
+            this.btnInsertMath.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnInsertMath_Click);
             // 
             // MathRibbon
             // 

@@ -10,8 +10,37 @@ namespace PowerPointLatexPlugin
 {
     public partial class ThisAddIn
     {
+
+        public bool WaitingForMathField { get; set; } = false;
+
+        private void Application_WindowSelectionChange(Microsoft.Office.Interop.PowerPoint.Selection selection)
+        {
+            if (!WaitingForMathField)
+                return;
+
+            if (selection.Type != Microsoft.Office.Interop.PowerPoint.PpSelectionType.ppSelectionShapes)
+                return;
+
+            if (selection.ShapeRange.Count != 1)
+                return;
+
+            Microsoft.Office.Interop.PowerPoint.Shape shape = selection.ShapeRange[1];
+
+            if (shape.HasTextFrame == Microsoft.Office.Core.MsoTriState.msoTrue)
+            {
+                shape.Tags.Add("MathField", "true");
+
+                System.Windows.Forms.MessageBox.Show(
+                    "Math Field successfully detected!\nTag: " + shape.Tags["MathField"]
+                    );
+
+                WaitingForMathField = false;
+            }
+
+        }
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
+            this.Application.WindowSelectionChange += Application_WindowSelectionChange;
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
