@@ -15,9 +15,7 @@ namespace PowerPointLatexPlugin
 
         private void btnInsertMath_Click(object sender, RibbonControlEventArgs e)
         {
-            Globals.ThisAddIn.WaitingForMathField = true;
-
-            Globals.ThisAddIn.Application.CommandBars.ExecuteMso("TextBoxInsert");
+            Globals.ThisAddIn.StartLatexFieldDrawing();
         }
     }
 }
