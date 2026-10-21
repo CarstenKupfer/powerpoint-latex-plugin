@@ -52,15 +52,15 @@
             // group1
             // 
             this.group1.Items.Add(this.btnInsertMath);
-            this.group1.Label = "Mathematics";
+            this.group1.Label = "LaTeX";
             this.group1.Name = "group1";
             // 
             // btnInsertMath
             // 
-            this.btnInsertMath.Label = "Insert Math";
+            this.btnInsertMath.Label = "Insert LaTeX";
             this.btnInsertMath.Name = "btnInsertMath";
-            this.btnInsertMath.ScreenTip = "Insert Math Field";
-            this.btnInsertMath.SuperTip = "Insert a new editable LaTeX math field.";
+            this.btnInsertMath.ScreenTip = "Insert LaTeX Field";
+            this.btnInsertMath.SuperTip = "Insert a new editable LaTeX field.";
             this.btnInsertMath.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnInsertMath_Click);
             // 
             // MathRibbon
