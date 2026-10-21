@@ -263,13 +263,13 @@ namespace PowerPointLatexPlugin
                     height
                 );
 
-            textBox.Tags.Add("MathField", "true");
+            textBox.Tags.Add("LatexField", "true");
 
             textBox.TextFrame.TextRange.Select();
 
             System.Windows.Forms.MessageBox.Show(
                 "LaTeX Field successfully detected!\nTag: "
-                + textBox.Tags["MathField"]
+                + textBox.Tags["LatexField"]
             );
         }
 
