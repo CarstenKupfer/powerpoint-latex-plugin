@@ -182,6 +182,7 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="LatexFieldDrawer.cs" />
     <Compile Include="MathRibbon.cs">
       <SubType>Component</SubType>
     </Compile>
