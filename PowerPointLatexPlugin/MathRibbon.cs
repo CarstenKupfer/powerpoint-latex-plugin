@@ -13,9 +13,17 @@ namespace PowerPointLatexPlugin
 
         }
 
-        private void btnInsertMath_Click(object sender, RibbonControlEventArgs e)
+        private void tglInsertLatex_Click(object sender, RibbonControlEventArgs e)
         {
-            Globals.ThisAddIn.StartLatexFieldDrawing();
+            if (tglInsertLatex.Checked)
+            {
+                Globals.ThisAddIn.StartLatexFieldDrawing();
+            }
+        }
+
+        public void ResetInsertLatexToggle()
+        {
+            tglInsertLatex.Checked = false;
         }
     }
 }

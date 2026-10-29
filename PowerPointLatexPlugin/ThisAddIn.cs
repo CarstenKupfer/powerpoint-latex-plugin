@@ -17,11 +17,18 @@ namespace PowerPointLatexPlugin
 
         private PowerPoint.Shape activeLatexField = null;
 
+        private bool isSwitchingLatexMode = false;
+
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             // NEW
             latexFieldDrawer =
                 new LatexFieldDrawer(this.Application);
+
+            latexFieldDrawer.DrawingFinished += () =>
+            {
+                Globals.Ribbons.MathRibbon.ResetInsertLatexToggle();
+            };
 
             this.Application.WindowSelectionChange +=
                 Application_WindowSelectionChange;
@@ -44,6 +51,32 @@ namespace PowerPointLatexPlugin
         private void Application_WindowSelectionChange(
             PowerPoint.Selection selection)
         {
+
+            if (isSwitchingLatexMode)
+                return;
+
+            try
+            {
+                if ((selection.Type ==
+                    PowerPoint.PpSelectionType.ppSelectionShapes || 
+                    selection.Type ==
+                    PowerPoint.PpSelectionType.ppSelectionText)
+                    && selection.ShapeRange.Count == 1)
+                {
+                    PowerPoint.Shape selectedShape =
+                        selection.ShapeRange[1];
+
+                    if (selectedShape.Tags["LatexRender"] == "true")
+                    {
+                        OpenLatexEditor(selectedShape);
+                        return;
+                    }
+                }
+            }
+            catch
+            {
+            }
+
             PowerPoint.Shape currentLatexField = null;
 
             try
@@ -90,10 +123,65 @@ namespace PowerPointLatexPlugin
                             latexSource
                         );
 
-                        System.Windows.Forms.MessageBox.Show(
-                            "LaTeX source saved!\n\n" +
-                            "LatexSource = " + latexSource
+                        string imagePath = LatexRenderer.RenderToPng(latexSource);
+
+                        PowerPoint.Slide slide = this.Application.ActiveWindow.View.Slide;
+
+                        DeleteExistingRender(slide, activeLatexField.Id);
+
+                        PowerPoint.Shape renderedFormula =
+                            slide.Shapes.AddPicture(
+                                imagePath,
+                                Office.MsoTriState.msoFalse,
+                                Office.MsoTriState.msoTrue,
+                                activeLatexField.Left,
+                                activeLatexField.Top,
+                                -1,
+                                -1
+                            );
+
+                        // Seitenverhältnis fixieren
+                        renderedFormula.LockAspectRatio = Office.MsoTriState.msoTrue;
+
+                        // Größe des ursprünglichen LaTeX-Feldes
+                        float maxWidth = activeLatexField.Width;
+                        float maxHeight = activeLatexField.Height;
+
+                        // Aktuelle natürliche Bildgröße
+                        float imageWidth = renderedFormula.Width;
+                        float imageHeight = renderedFormula.Height;
+
+                        // Skalierungsfaktoren berechnen
+                        float widthScale = maxWidth / imageWidth;
+                        float heightScale = maxHeight / imageHeight;
+
+                        // Kleineren Faktoren nehmen, damit nichts abgeschnitten/verzerrt wird
+                        float scaleFactor = Math.Min(widthScale, heightScale);
+
+                        // Größe proportional setzen
+                        renderedFormula.Width = imageWidth * scaleFactor;
+
+                        // Durch LockAspectRatio passt sich die Höhe automatisch an
+
+                        // Im ursprünglichen Feld zentrieren
+                        renderedFormula.Left =
+                            activeLatexField.Left +
+                            (maxWidth - renderedFormula.Width) / 2;
+
+                        renderedFormula.Top =
+                            activeLatexField.Top +
+                            (maxHeight - renderedFormula.Height) / 2;
+
+                        // Rendering kennzeichnen
+                        renderedFormula.Tags.Add("LatexRender", "true");
+
+                        renderedFormula.Tags.Add(
+                            "SourceShapeId",
+                            activeLatexField.Id.ToString()
                         );
+
+                        // LaTeX-Quelltext verstecken
+                        activeLatexField.Visible = Office.MsoTriState.msoFalse;  
                     }
                     catch
                     {
@@ -119,19 +207,83 @@ namespace PowerPointLatexPlugin
                     {
                         string savedLatex =
                             currentLatexField.Tags["LatexSource"];
-
-                        // Nur anzeigen, wenn bereits etwas gespeichert wurde
-                        if (!string.IsNullOrEmpty(savedLatex))
-                        {
-                            System.Windows.Forms.MessageBox.Show(
-                                "Loaded LaTeX source:\n\n" +
-                                savedLatex
-                            );
-                        }
                     }
                     catch
                     {
                     }
+                }
+            }
+        }
+
+        private void OpenLatexEditor(PowerPoint.Shape renderedShape)
+        {
+            string sourceShapeIdText = renderedShape.Tags["SourceShapeId"];
+
+            if (!int.TryParse(sourceShapeIdText, out int sourceShapeId))
+                return;
+
+            PowerPoint.Slide slide = this.Application.ActiveWindow.View.Slide;
+
+            PowerPoint.Shape sourceShape = null;
+
+            foreach (PowerPoint.Shape shape in slide.Shapes)
+            {
+                if (shape.Id == sourceShapeId)
+                {
+                    sourceShape = shape;
+                    break;
+                }
+            }
+
+            if (sourceShape == null)
+                return;
+
+            isSwitchingLatexMode = true;
+
+            try
+            {
+                // Gerenderte Formel verstecken
+                renderedShape.Visible = Office.MsoTriState.msoFalse;
+
+                // Ursprüngliches LaTeX-Feld wieder anzeigen
+                sourceShape.Visible = Office.MsoTriState.msoTrue;
+
+                // Als aktives LaTeX-Feld merken
+                activeLatexField = sourceShape;
+
+                // Shape auswählen
+                sourceShape.Select(Office.MsoTriState.msoTrue);
+
+                // Direkt Textbearbeitung aktivieren
+                sourceShape.TextFrame.TextRange.Select();
+            }
+            finally
+            {
+                isSwitchingLatexMode = false;
+            }
+        }
+
+        private void DeleteExistingRender(
+            PowerPoint.Slide slide, int sourceShapeId)
+        {
+            for (int i = slide.Shapes.Count; i >= 1; i--)
+            {
+                PowerPoint.Shape shape = slide.Shapes[i];
+
+                try
+                {
+                    bool isLatexRender = shape.Tags["LatexRender"] == "true";
+
+                    bool belongsToSource = shape.Tags["SourceShapeId"] == sourceShapeId.ToString();
+
+                    if (isLatexRender && belongsToSource)
+                    {
+                        shape.Delete();
+                    }
+                }
+                catch
+                {
+                    // Shape ist kein LaTeX-Render -> ignorieren
                 }
             }
         }
