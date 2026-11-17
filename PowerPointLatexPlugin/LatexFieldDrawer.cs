@@ -23,6 +23,8 @@ namespace PowerPointLatexPlugin
 
         private PowerPoint.Shape previewShape;
 
+        public event Action DrawingFinished;
+
         public LatexFieldDrawer(PowerPoint.Application application)
         {
             this.application = application;
@@ -97,6 +99,8 @@ namespace PowerPointLatexPlugin
                     Stop();
 
                     CreateLatexField(startPoint, endPoint);
+
+                    DrawingFinished?.Invoke();
 
                     return new IntPtr(1);
                 }
@@ -263,14 +267,14 @@ namespace PowerPointLatexPlugin
                     height
                 );
 
+            // Das Feld soll die vom User aufgezogene Größe behalten
+            textBox.TextFrame.AutoSize = PowerPoint.PpAutoSize.ppAutoSizeNone;
+
+            textBox.TextFrame.WordWrap = Office.MsoTriState.msoTrue;
+
             textBox.Tags.Add("LatexField", "true");
 
             textBox.TextFrame.TextRange.Select();
-
-            System.Windows.Forms.MessageBox.Show(
-                "LaTeX Field successfully detected!\nTag: "
-                + textBox.Tags["LatexField"]
-            );
         }
 
         private float ScreenToSlideX(int screenX)

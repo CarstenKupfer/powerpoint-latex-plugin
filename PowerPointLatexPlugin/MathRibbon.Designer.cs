@@ -36,7 +36,7 @@
         {
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
-            this.btnInsertMath = this.Factory.CreateRibbonButton();
+            this.tglInsertLatex = this.Factory.CreateRibbonToggleButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.SuspendLayout();
@@ -51,17 +51,17 @@
             // 
             // group1
             // 
-            this.group1.Items.Add(this.btnInsertMath);
+            this.group1.Items.Add(this.tglInsertLatex);
             this.group1.Label = "LaTeX";
             this.group1.Name = "group1";
             // 
-            // btnInsertMath
+            // tglInsertLatex
             // 
-            this.btnInsertMath.Label = "Insert LaTeX";
-            this.btnInsertMath.Name = "btnInsertMath";
-            this.btnInsertMath.ScreenTip = "Insert LaTeX Field";
-            this.btnInsertMath.SuperTip = "Insert a new editable LaTeX field.";
-            this.btnInsertMath.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnInsertMath_Click);
+            this.tglInsertLatex.Label = "Insert LaTeX";
+            this.tglInsertLatex.Name = "tglInsertLatex";
+            this.tglInsertLatex.ScreenTip = "Insert LaTeX Field";
+            this.tglInsertLatex.SuperTip = "Insert a new editable LaTeX field.";
+            this.tglInsertLatex.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.tglInsertLatex_Click);
             // 
             // MathRibbon
             // 
@@ -81,7 +81,7 @@
 
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnInsertMath;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton tglInsertLatex;
     }
 
     partial class ThisRibbonCollection
