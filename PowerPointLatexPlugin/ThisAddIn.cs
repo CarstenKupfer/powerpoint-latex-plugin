@@ -123,7 +123,8 @@ namespace PowerPointLatexPlugin
                             latexSource
                         );
 
-                        string imagePath = LatexRenderer.RenderToPng(latexSource);
+                        string imagePath =
+                               LatexRenderer.RenderToSvg(latexSource);      
 
                         PowerPoint.Slide slide = this.Application.ActiveWindow.View.Slide;
 
