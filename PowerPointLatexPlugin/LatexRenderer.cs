@@ -1,4 +1,5 @@
-﻿using WpfMath;
+﻿using System;
+using WpfMath;
 using WpfMath.Rendering;
 
 namespace PowerPointLatexPlugin
@@ -34,8 +35,12 @@ namespace PowerPointLatexPlugin
 
             return filePath;
         }
-        public static string RenderToSvg(string latex)
+        public static string RenderToSvg(string latex, double opacity = 1.0)
         {
+            opacity = Math.Max(0.0, Math.Min(1.0, opacity));
+
+            string opacityText = opacity.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
             var parser =
                 WpfMath.Parsers.WpfTeXFormulaParser.Instance;
 
@@ -118,7 +123,8 @@ namespace PowerPointLatexPlugin
                 .AppendLine(
                     "<g transform=\"translate(" +
                     translateXText + " " +
-                    translateYText + ")\">"
+                    translateYText + ")\" " + 
+                    "opacity=\"" + opacityText + "\">"
                 )
                 .AppendLine(svgPathText)
                 .AppendLine("</g>")
